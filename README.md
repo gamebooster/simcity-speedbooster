@@ -3,7 +3,15 @@ simcity-speedbooster
 
 Increase Speed beyond Cheetah
 
+## Usage
+
+Start SimCity, load your city then start the program.
+
 ## Download
 
     SimCitySpeedBooster.exe (28 KB)
-    https://mega.co.nz/#!aQZlUabb!PQq-lR0mQHrHDBGcuL-NcB3f8qYg_ZTTvhtPPrBtyhU
+    http://booster.fetchapp.com/permalink/wsilee
+
+## More
+
+http://www.reddit.com/r/SimCity/comments/1a1j37/speedbooster_increase_speed_beyond_cheetah/
