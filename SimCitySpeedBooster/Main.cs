@@ -94,7 +94,7 @@ namespace SimCitySpeedBooster {
     }
 
     private void LinkLabelLinkClicked(object sender, LinkLabelLinkClickedEventArgs e) {
-      Process.Start("http://gamebooster.github.com");
+      Process.Start("https://github.com/gamebooster/simcity-speedbooster");
     }
   }
 }
