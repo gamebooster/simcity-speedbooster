@@ -10,7 +10,7 @@ Start SimCity, load your city then start the program.
 ## Download
 
     SimCitySpeedBooster.exe (28 KB)
-    http://booster.fetchapp.com/permalink/wsilee
+    http://booster.fetchapp.com/permalink/ijieph
 
 ## More
 
