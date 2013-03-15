@@ -20,11 +20,33 @@ namespace SimCitySpeedBooster {
       searchTimer.Start();
 
       _increaseHotkey = new Hotkey(Settings.Default.increaseHotkey);
-      _increaseHotkey.Pressed += (sender, args) => { if (speedNumeric.Value < 100) speedNumeric.Value += 1; };
+      _increaseHotkey.Pressed += (sender, args) =>
+	      {
+		      const int maxSpeed = 100;
+
+		      if (speedNumeric.Value < maxSpeed)
+			  {
+				  if (speedNumeric.Value + 1 <= maxSpeed)
+					  speedNumeric.Value += 1;
+				  else
+					  speedNumeric.Value = maxSpeed;
+			  }
+	      };
       _increaseHotkey.Register(this);
 
       _decreaseHotkey = new Hotkey(Settings.Default.decreaseHotkey);
-      _decreaseHotkey.Pressed += (sender, args) => { if (speedNumeric.Value > 0) speedNumeric.Value -= 1; };
+	    _decreaseHotkey.Pressed += (sender, args) =>
+		    {
+			    const int minSpeed = 0;
+
+			    if (speedNumeric.Value > minSpeed)
+			    {
+					if (speedNumeric.Value - 1 >= minSpeed)
+						speedNumeric.Value -= 1;
+					else
+						speedNumeric.Value = minSpeed;
+			    }
+		    };
       _decreaseHotkey.Register(this);
     }
 
