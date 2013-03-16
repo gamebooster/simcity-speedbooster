@@ -12,6 +12,7 @@ namespace SimCitySpeedBooster {
 
     private readonly Hotkey _increaseHotkey;
     private readonly Hotkey _decreaseHotkey;
+    private IntPtr _ifAddress;
 
     public Main() {
       InitializeComponent();
@@ -20,11 +21,15 @@ namespace SimCitySpeedBooster {
       searchTimer.Start();
 
       _increaseHotkey = new Hotkey(Settings.Default.increaseHotkey);
-      _increaseHotkey.Pressed += (sender, args) => { if (speedNumeric.Value < 100) speedNumeric.Value += 1; };
+      _increaseHotkey.Pressed += (sender, args) => {
+        if (speedNumeric.Value + 1 <= speedNumeric.Maximum) speedNumeric.Value += 1;
+      };
       _increaseHotkey.Register(this);
 
       _decreaseHotkey = new Hotkey(Settings.Default.decreaseHotkey);
-      _decreaseHotkey.Pressed += (sender, args) => { if (speedNumeric.Value > 0) speedNumeric.Value -= 1; };
+      _decreaseHotkey.Pressed += (sender, args) => {
+        if (speedNumeric.Value - 1 >= speedNumeric.Minimum) speedNumeric.Value -= 1;
+      };
       _decreaseHotkey.Register(this);
     }
 
@@ -44,6 +49,17 @@ namespace SimCitySpeedBooster {
       statusLabel.Text = Resources.checking_player_status___;
 
       _processMemory.OpenProcess(processes[0]);
+      _ifAddress = _processMemory.FindPattern(new byte[] {
+        0x8D, 0x4C, 0x24, 0x1C, 0x77, 0x02
+      }, "xxxxxx");
+
+      _ifAddress += 4;
+
+      if (_processMemory.ReadBytes(_ifAddress, 2)[0] != 0x77)
+        throw new ApplicationException("!ifAdress");
+
+      _processMemory.Write(_ifAddress, new byte[] { 0x90, 0x90 });
+
       var address = _processMemory.FindPattern(
         new byte[]
           {
@@ -95,6 +111,11 @@ namespace SimCitySpeedBooster {
 
     private void LinkLabelLinkClicked(object sender, LinkLabelLinkClickedEventArgs e) {
       Process.Start("https://github.com/gamebooster/simcity-speedbooster");
+    }
+
+    private void Main_FormClosed(object sender, FormClosedEventArgs e)
+    {
+      if (_ifAddress != IntPtr.Zero) _processMemory.Write(_ifAddress, new byte[] { 0x77, 0x02 });
     }
   }
 }

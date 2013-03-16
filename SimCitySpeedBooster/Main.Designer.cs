@@ -39,6 +39,11 @@
       // 
       this.speedNumeric.DecimalPlaces = 4;
       this.speedNumeric.Location = new System.Drawing.Point(12, 6);
+      this.speedNumeric.Maximum = new decimal(new int[] {
+            10000,
+            0,
+            0,
+            0});
       this.speedNumeric.Name = "speedNumeric";
       this.speedNumeric.Size = new System.Drawing.Size(120, 20);
       this.speedNumeric.TabIndex = 0;
@@ -104,6 +109,7 @@
       this.ShowIcon = false;
       this.Text = "SimCity SpeedBooster";
       this.usageTooltip.SetToolTip(this, "gamebooster.github.com");
+      this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.Main_FormClosed);
       ((System.ComponentModel.ISupportInitialize)(this.speedNumeric)).EndInit();
       this.ResumeLayout(false);
       this.PerformLayout();

@@ -1,12 +1,68 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
 using System.Runtime.InteropServices;
 
-namespace GW2FoVBooster {
+namespace SimCitySpeedBooster {
   internal class ProcessMemory {
     private Process _process;
+
+    [Flags]
+    public enum AllocationType
+    {
+      Commit = 0x1000,
+      Reserve = 0x2000,
+      Decommit = 0x4000,
+      Release = 0x8000,
+      Reset = 0x80000,
+      Physical = 0x400000,
+      TopDown = 0x100000,
+      WriteWatch = 0x200000,
+      LargePages = 0x20000000
+    }
+
+    [Flags]
+    public enum MemoryProtection
+    {
+      Execute = 0x10,
+      ExecuteRead = 0x20,
+      ExecuteReadWrite = 0x40,
+      ExecuteWriteCopy = 0x80,
+      NoAccess = 0x01,
+      ReadOnly = 0x02,
+      ReadWrite = 0x04,
+      WriteCopy = 0x08,
+      GuardModifierflag = 0x100,
+      NoCacheModifierflag = 0x200,
+      WriteCombineModifierflag = 0x400
+    }
+
+    [Flags]
+    public enum FreeType
+    {
+      Decommit = 0x4000,
+      Release = 0x8000,
+    }
+
+    [DllImport("kernel32.dll")]
+    static extern bool VirtualProtectEx(IntPtr hProcess, IntPtr lpAddress, uint dwSize, Protection flNewProtect, out Protection lpflOldProtect);
+
+    public enum Protection
+    {
+      PageNoaccess = 0x01,
+      PageReadonly = 0x02,
+      PageReadwrite = 0x04,
+      PageWritecopy = 0x08,
+      PageExecute = 0x10,
+      PageExecuteRead = 0x20,
+      PageExecuteReadwrite = 0x40,
+      PageExecuteWritecopy = 0x80,
+      PageGuard = 0x100,
+      PageNocache = 0x200,
+      PageWritecombine = 0x400
+    }
 
     [DllImport("kernel32.dll", SetLastError = true)]
     private static extern bool WriteProcessMemory(IntPtr hProcess, IntPtr lpBaseAddress, byte[] lpBuffer, uint nSize,
@@ -29,6 +85,26 @@ namespace GW2FoVBooster {
       int bytesRead;
       if (ReadProcessMemory(_process.Handle, address, buffer, size, out bytesRead) == false) throw new ApplicationException("ReadProcessMemory failed: " + address);
       return buffer;
+    }
+
+    public void Write(IntPtr address, byte[] data)
+    {
+      var size = (uint)data.Length;
+
+      int written;
+      Protection protection;
+      if (VirtualProtectEx(_process.Handle, address, size, Protection.PageExecuteReadwrite, out protection) == false)
+      {
+        throw new Win32Exception(Marshal.GetLastWin32Error());
+      }
+      if (WriteProcessMemory(_process.Handle, address, data, size, out written) == false)
+      {
+        throw new Win32Exception(Marshal.GetLastWin32Error());
+      }
+      if (VirtualProtectEx(_process.Handle, address, size, protection, out protection) == false)
+      {
+        throw new Win32Exception(Marshal.GetLastWin32Error());
+      }
     }
 
     public string ReadString(IntPtr address, int size) {
@@ -101,7 +177,7 @@ namespace GW2FoVBooster {
     }
 
     private bool MaskCheck(IList<byte> data, int offset, IEnumerable<byte> btPattern, string strMask) {
-      return !btPattern.Where((t, x) => strMask[x] != '?' && ((strMask[x] == 'x') && (t != data[x + offset]))).Any();
+      return !btPattern.Where((t, x) => strMask[x] != '?' && ((strMask[x] == 'x') && (data.Count > x + offset && t != data[x + offset]))).Any();
     }
 
     public IntPtr FindPattern(byte[] bytePattern, string stringMask) {
