@@ -4,14 +4,12 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
 using System.Runtime.InteropServices;
+using System.Text;
 
 namespace SimCitySpeedBooster {
   internal class ProcessMemory {
-    private Process _process;
-
     [Flags]
-    public enum AllocationType
-    {
+    public enum AllocationType {
       Commit = 0x1000,
       Reserve = 0x2000,
       Decommit = 0x4000,
@@ -24,8 +22,13 @@ namespace SimCitySpeedBooster {
     }
 
     [Flags]
-    public enum MemoryProtection
-    {
+    public enum FreeType {
+      Decommit = 0x4000,
+      Release = 0x8000,
+    }
+
+    [Flags]
+    public enum MemoryProtection {
       Execute = 0x10,
       ExecuteRead = 0x20,
       ExecuteReadWrite = 0x40,
@@ -39,18 +42,7 @@ namespace SimCitySpeedBooster {
       WriteCombineModifierflag = 0x400
     }
 
-    [Flags]
-    public enum FreeType
-    {
-      Decommit = 0x4000,
-      Release = 0x8000,
-    }
-
-    [DllImport("kernel32.dll")]
-    static extern bool VirtualProtectEx(IntPtr hProcess, IntPtr lpAddress, uint dwSize, Protection flNewProtect, out Protection lpflOldProtect);
-
-    public enum Protection
-    {
+    public enum Protection {
       PageNoaccess = 0x01,
       PageReadonly = 0x02,
       PageReadwrite = 0x04,
@@ -63,6 +55,12 @@ namespace SimCitySpeedBooster {
       PageNocache = 0x200,
       PageWritecombine = 0x400
     }
+
+    private Process _process;
+
+    [DllImport("kernel32.dll")]
+    private static extern bool VirtualProtectEx(IntPtr hProcess, IntPtr lpAddress, uint dwSize, Protection flNewProtect,
+                                                out Protection lpflOldProtect);
 
     [DllImport("kernel32.dll", SetLastError = true)]
     private static extern bool WriteProcessMemory(IntPtr hProcess, IntPtr lpBaseAddress, byte[] lpBuffer, uint nSize,
@@ -83,36 +81,33 @@ namespace SimCitySpeedBooster {
     public byte[] ReadBytes(IntPtr address, int size) {
       var buffer = new byte[size];
       int bytesRead;
-      if (ReadProcessMemory(_process.Handle, address, buffer, size, out bytesRead) == false) throw new ApplicationException("ReadProcessMemory failed: " + address);
+      if (ReadProcessMemory(_process.Handle, address, buffer, size, out bytesRead) == false)
+        throw new ApplicationException("ReadProcessMemory failed: " + address);
       return buffer;
     }
 
-    public void Write(IntPtr address, byte[] data)
-    {
-      var size = (uint)data.Length;
+    public void Write(IntPtr address, byte[] data) {
+      var size = (uint) data.Length;
 
       int written;
       Protection protection;
-      if (VirtualProtectEx(_process.Handle, address, size, Protection.PageExecuteReadwrite, out protection) == false)
-      {
+      if (VirtualProtectEx(_process.Handle, address, size, Protection.PageExecuteReadwrite, out protection) == false) {
         throw new Win32Exception(Marshal.GetLastWin32Error());
       }
-      if (WriteProcessMemory(_process.Handle, address, data, size, out written) == false)
-      {
+      if (WriteProcessMemory(_process.Handle, address, data, size, out written) == false) {
         throw new Win32Exception(Marshal.GetLastWin32Error());
       }
-      if (VirtualProtectEx(_process.Handle, address, size, protection, out protection) == false)
-      {
+      if (VirtualProtectEx(_process.Handle, address, size, protection, out protection) == false) {
         throw new Win32Exception(Marshal.GetLastWin32Error());
       }
     }
 
     public string ReadString(IntPtr address, int size) {
-      return System.Text.Encoding.UTF8.GetString(ReadBytes(address, size), 0, size);
+      return Encoding.UTF8.GetString(ReadBytes(address, size), 0, size);
     }
 
     public string ReadWideString(IntPtr address, int size) {
-      return System.Text.Encoding.Unicode.GetString(ReadBytes(address, size), 0, size);
+      return Encoding.Unicode.GetString(ReadBytes(address, size), 0, size);
     }
 
     public bool ReadBoolean(IntPtr address) {
@@ -177,7 +172,10 @@ namespace SimCitySpeedBooster {
     }
 
     private bool MaskCheck(IList<byte> data, int offset, IEnumerable<byte> btPattern, string strMask) {
-      return !btPattern.Where((t, x) => strMask[x] != '?' && ((strMask[x] == 'x') && (data.Count > x + offset && t != data[x + offset]))).Any();
+      return
+        !btPattern.Where(
+          (t, x) => strMask[x] != '?' && ((strMask[x] == 'x') && (data.Count > x + offset && t != data[x + offset])))
+                  .Any();
     }
 
     public IntPtr FindPattern(byte[] bytePattern, string stringMask) {
@@ -187,9 +185,9 @@ namespace SimCitySpeedBooster {
       const int minAddress = 0x400000;
       const int maxAddress = 0x800000;
 
-      var data = ReadBytes((IntPtr) minAddress, maxAddress - minAddress);
+      byte[] data = ReadBytes((IntPtr) minAddress, maxAddress - minAddress);
 
-      for (var x = 0; x < maxAddress; x++) {
+      for (int x = 0; x < maxAddress; x++) {
         if (MaskCheck(data, x, bytePattern, stringMask)) {
           return new IntPtr(minAddress + (x));
         }

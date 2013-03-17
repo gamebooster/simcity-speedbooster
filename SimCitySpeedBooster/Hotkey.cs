@@ -4,8 +4,8 @@ using System.Runtime.InteropServices;
 using System.Windows.Forms;
 using System.Xml.Serialization;
 
-namespace GW2FoVBooster {
-  public class Hotkey : IMessageFilter {
+namespace SimCitySpeedBooster {
+  internal class Hotkey : IMessageFilter {
     #region Interop
 
     private const int WmHotkey = 0x312;
@@ -56,14 +56,12 @@ namespace GW2FoVBooster {
 
     public bool PreFilterMessage(ref Message message) {
       // Only process WM_HOTKEY messages
-      if (message.Msg != WmHotkey)
-      {
+      if (message.Msg != WmHotkey) {
         return false;
       }
 
       // Check that the ID is our key and we are registerd
-      if (_registered && (message.WParam.ToInt32() == _id))
-      {
+      if (_registered && (message.WParam.ToInt32() == _id)) {
         // Fire the event and pass on the event if our handlers didn't handle it
         return OnPressed();
       }
@@ -76,19 +74,16 @@ namespace GW2FoVBooster {
 
     ~Hotkey() {
       // Unregister the hotkey if necessary
-      if (Registered)
-      {
+      if (Registered) {
         Unregister();
       }
     }
 
     public bool GetCanRegister(Control windowControl) {
       // Handle any exceptions: they mean "no, you can't register" :)
-      try
-      {
+      try {
         // Attempt to register
-        if (!Register(windowControl))
-        {
+        if (!Register(windowControl)) {
           return false;
         }
 
@@ -96,12 +91,10 @@ namespace GW2FoVBooster {
         Unregister();
         return true;
       }
-      catch (Win32Exception)
-      {
+      catch (Win32Exception) {
         return false;
       }
-      catch (NotSupportedException)
-      {
+      catch (NotSupportedException) {
         return false;
       }
     }
@@ -131,14 +124,12 @@ namespace GW2FoVBooster {
       if ((KeyCode & Keys.Shift) == Keys.Shift)
         modifiers = modifiers | ModShift;
 
-      Keys k = KeyCode & ~Keys.Control & ~Keys.Shift & ~Keys.Alt;   
+      Keys k = KeyCode & ~Keys.Control & ~Keys.Shift & ~Keys.Alt;
 
       // Register the hotkey
-      if (RegisterHotKey(windowControl.Handle, _id, modifiers, k) == 0)
-      {
+      if (RegisterHotKey(windowControl.Handle, _id, modifiers, k) == 0) {
         // Is the error that the hotkey is registered?
-        if (Marshal.GetLastWin32Error() == ErrorHotkeyAlreadyRegistered)
-        {
+        if (Marshal.GetLastWin32Error() == ErrorHotkeyAlreadyRegistered) {
           return false;
         }
         throw new Win32Exception();
@@ -154,17 +145,14 @@ namespace GW2FoVBooster {
 
     public void Unregister() {
       // Check that we have registered
-      if (!_registered)
-      {
+      if (!_registered) {
         throw new NotSupportedException("You cannot unregister a hotkey that is not registered");
       }
 
       // It's possible that the control itself has died: in that case, no need to unregister!
-      if (!_windowControl.IsDisposed)
-      {
+      if (!_windowControl.IsDisposed) {
         // Clean up after ourselves
-        if (UnregisterHotKey(_windowControl.Handle, _id) == 0)
-        {
+        if (UnregisterHotKey(_windowControl.Handle, _id) == 0) {
           throw new Win32Exception();
         }
       }
@@ -176,8 +164,7 @@ namespace GW2FoVBooster {
 
     private void Reregister() {
       // Only do something if the key is already registered
-      if (!_registered)
-      {
+      if (!_registered) {
         return;
       }
 
@@ -192,8 +179,7 @@ namespace GW2FoVBooster {
     private bool OnPressed() {
       // Fire the event if we can
       var handledEventArgs = new HandledEventArgs(false);
-      if (Pressed != null)
-      {
+      if (Pressed != null) {
         Pressed(this, handledEventArgs);
       }
 

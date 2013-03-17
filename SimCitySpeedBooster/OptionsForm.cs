@@ -2,9 +2,6 @@
 
 namespace GW2FoVBooster {
   public partial class OptionsForm : Form {
-    public Keys IncreaseHotkey { get; private set; }
-    public Keys DecreaseHotkey { get; private set; }
-
     public OptionsForm(Keys increaseHotkey, Keys decreaseHotkey) {
       InitializeComponent();
       increaseHotkeyBox.Text = increaseHotkey.ToString();
@@ -12,6 +9,9 @@ namespace GW2FoVBooster {
       decreaseHotkeyBox.Text = decreaseHotkey.ToString();
       DecreaseHotkey = decreaseHotkey;
     }
+
+    public Keys IncreaseHotkey { get; private set; }
+    public Keys DecreaseHotkey { get; private set; }
 
     private void IncreaseHotkeyBoxKeyDown(object sender, KeyEventArgs e) {
       increaseHotkeyBox.Text = e.KeyData.ToString();
