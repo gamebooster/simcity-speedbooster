@@ -1,11 +1,17 @@
 simcity-speedbooster
 ====================
 
-Increase Speed beyond Cheetah
+Increase speed beyond cheetah (and re-enable cheetah)
 
 ## Usage
 
-Start SimCity, load your city then start the program.
+Start SimCity, load your city then start the program. Then set your desired speed.
+
+* Turtle: 0.25
+* Llama:  1.00
+* Cheetah: 2.00
+
+You can go up to 5.00 without any gameplay trouble (safe value different from city to city). From there some agents (water, sewage etc) seem to have problems.
 
 ## Download
 
