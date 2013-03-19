@@ -3,6 +3,8 @@ simcity-speedbooster
 
 Increase speed beyond cheetah (and re-enable cheetah)
 
+![speedbooster](http://i.imgur.com/EDyiNk6.png)
+
 ## Usage
 
 Start SimCity, load your city then start the program. Then set your desired speed.
