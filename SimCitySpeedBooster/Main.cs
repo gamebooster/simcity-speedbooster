@@ -89,7 +89,7 @@ namespace SimCitySpeedBooster {
       statusLabel.Hide();
       speedNumeric.Show();
 
-      _speedAddress = gameUI + 0x264;
+      _speedAddress = gameUI + 0x278;
 
       speedNumeric.Value = (decimal) _processMemory.ReadFloat(_speedAddress);
     }
