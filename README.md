@@ -18,7 +18,7 @@ You can go up to 5.00 without any gameplay trouble (safe value different from ci
 ## Download
 
     SimCitySpeedBooster.exe (30 KB)
-    http://booster.fetchapp.com/permalink/rngeto
+    http://booster.fetchapp.com/permalink/eewaxa
 
 ## More
 
